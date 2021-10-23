@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect
 from flask_pymongo import PyMongo
+import pymongo
 import scrape_mars
 
 # Create an instance of Flask
@@ -8,12 +9,12 @@ app = Flask(__name__)
 # # Use PyMongo to establish Mongo connection
 # mongo = PyMongo(app, uri="mongodb://localhost:27017/weather_app")
 # Initialize PyMongo to work with MongoDBs
-    conn = 'mongodb://localhost:27017'
-    client = pymongo.MongoClient(conn)
+conn = 'mongodb://localhost:27017'
+client = pymongo.MongoClient(conn)
 
-    # Define database and collection
-    db = client.mars_db
-    collection = db.items
+# Define database and collection
+db = client.mars_db
+collection = db.items
 
 
 # Route to render index.html template using data from Mongo
@@ -24,13 +25,14 @@ def home():
     destination_data = db.items.find_one()
 
     # Return template and data
-    return render_template("index.html", mars=destination_data)
+    return render_template("index.html", mars=destination_data,tables=destination_data['facts_html'])
+
 
 
 # Route that will trigger the scrape function
 @app.route("/scrape")
 def scrape():
-
+    db.items.drop()
     # Run the scrape function
     mars_data = scrape_mars.scrape()
 
